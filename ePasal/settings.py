@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ybcb!gd8qbx%(gp@ewd%jm992^jwy&b*+l#99qf229vfrlt=2c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,12 +74,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ePasal.wsgi.application'
 
 
-# Database
+# Databasedjango.db.backends.sqlite3
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': '',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
