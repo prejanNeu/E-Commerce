@@ -3,10 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login-page : ePasal</title>
+    <title>Login - E-commerce</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #1a1a1a;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .loading .login-btn {
+            background: #ccc;
+            pointer-events: none;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #764ba2;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #34d399;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello</h1>
-    <h2>This is the login Page</h2>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Enter your credentials to continue</p>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" class="form-control" id="username" placeholder="Username" required>
+            </div>
+            
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="password" placeholder="Password" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="btn-text">Sign In</span>
+            </button>
+        </form>
+
+        <div class="footer-links">
+            <a href="/signup">Create Account</a>
+            <a href="/forgot-password">Forgot Password?</a>
+        </div>
+    </div>
+
+    <div class="success-message" id="successMessage">
+        Login successful! Redirecting...
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Reset UI
+            errorMessage.style.display = 'none';
+            loginBtn.classList.add('loading');
+            loginBtn.innerHTML = 'Signing in...';
+
+            // Make the API call
+            fetch('/api/login/post/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (response.ok) {
+                        // Show success message
+                        successMessage.style.display = 'block';
+                        
+                        // Redirect to dashboard after a brief delay
+                        setTimeout(function() {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } else {
+                        // Handle different error cases
+                        errorMessage.style.display = 'block';
+                        switch (response.status) {
+                            case 400:
+                                errorText.textContent = 'Please enter both username and password';
+                                break;
+                            case 401:
+                                errorText.textContent = 'Incorrect password';
+                                break;
+                            case 404:
+                                errorText.textContent = 'User does not exist';
+                                break;
+                            default:
+                                errorText.textContent = 'An error occurred. Please try again.';
+                        }
+                    }
+                });
+            })
+            .catch(function(err) {
+                errorMessage.style.display = 'block';
+                errorText.textContent = 'Network error. Please check your connection.';
+            })
+            .finally(function() {
+                loginBtn.classList.remove('loading');
+                loginBtn.innerHTML = 'Sign In';
+            });
+        });
+
+        // Add input focus effects
+        document.querySelectorAll('.form-control').forEach(function(input) {
+            input.addEventListener('focus', function() {
+                input.parentElement.querySelector('i').style.color = '#667eea';
+            });
+
+            input.addEventListener('blur', function() {
+                input.parentElement.querySelector('i').style.color = '#666';
+            });
+        });
+    </script>
 </body>
 </html>
