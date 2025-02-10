@@ -23,6 +23,8 @@ def login_api(request):
 
     print("Hello")
 
+    print(user)
+
     if user :
         login(request,user)
         return Response({"message":"Login Successful" }, status=status.HTTP_200_OK)

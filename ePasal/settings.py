@@ -74,8 +74,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ePasal.wsgi.application'
 
 
-# Databasedjango.db.backends.sqlite3
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 
 DATABASES = {
     'default': {
