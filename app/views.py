@@ -8,6 +8,10 @@ def login_page(request):
     return render(request,"app/login_page.html")
 
 
+def register_page(request):
+    return render(request,"app/register_page.html")
+
+
 def logout_page(request):
 
     logout(request.user)

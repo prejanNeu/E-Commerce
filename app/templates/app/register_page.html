@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - E-commerce</title>
+    <title>Register - ePasal</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -22,33 +22,33 @@
             padding: 20px;
         }
 
-        .login-container {
+        .register-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             padding: 40px;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             transform: translateY(0);
             transition: all 0.3s ease;
         }
 
-        .login-container:hover {
+        .register-container:hover {
             transform: translateY(-5px);
         }
 
-        .login-header {
+        .register-header {
             text-align: center;
             margin-bottom: 30px;
         }
 
-        .login-header h1 {
+        .register-header h1 {
             color: #1a1a1a;
             font-size: 28px;
             margin-bottom: 10px;
         }
 
-        .login-header p {
+        .register-header p {
             color: #666;
             font-size: 16px;
         }
@@ -56,6 +56,15 @@
         .form-group {
             margin-bottom: 20px;
             position: relative;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
         }
 
         .form-group i {
@@ -81,7 +90,7 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .login-btn {
+        .register-btn {
             width: 100%;
             padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -94,13 +103,18 @@
             transition: all 0.3s ease;
         }
 
-        .login-btn:hover {
+        .register-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .login-btn:active {
+        .register-btn:active {
             transform: translateY(0);
+        }
+
+        .loading .register-btn {
+            background: #ccc;
+            pointer-events: none;
         }
 
         .footer-links {
@@ -154,17 +168,21 @@
         }
 
         @media (max-width: 480px) {
-            .login-container {
+            .register-container {
                 padding: 20px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Welcome Back</h1>
-            <p>Enter your credentials to continue</p>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>Create Account</h1>
+            <p>Join ePasal to start shopping</p>
         </div>
         
         <div class="error-message" id="errorMessage">
@@ -172,30 +190,46 @@
             <span id="errorText"></span>
         </div>
 
-        <form id="loginForm">
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" class="form-control" id="firstName" placeholder="First Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" class="form-control" id="lastName" placeholder="Last Name" required>
+                </div>
+            </div>
+
             <div class="form-group">
-                <i class="fas fa-user"></i>
-                <input type="text" class="form-control" id="username" placeholder="Username" required>
+                <i class="fas fa-envelope"></i>
+                <input type="email" class="form-control" id="email" placeholder="Email Address" required>
             </div>
             
             <div class="form-group">
                 <i class="fas fa-lock"></i>
                 <input type="password" class="form-control" id="password" placeholder="Password" required>
             </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+            </div>
             
-            <button type="submit" class="login-btn" id="loginBtn">
-                <span class="btn-text">Sign In</span>
+            <button type="submit" class="register-btn" id="registerBtn">
+                <span class="btn-text">Create Account</span>
             </button>
         </form>
 
         <div class="footer-links">
-            <a href="/signup">Create Account</a>
-            <a href="/forgot-password">Forgot Password?</a>
+            <a href="/login">Already have an account? Sign In</a>
         </div>
     </div>
 
     <div class="success-message" id="successMessage">
-        Login successful! Redirecting...
+        Registration successful! Redirecting...
     </div>
 
     <script>
@@ -209,43 +243,90 @@
             });
             return csrfToken;
         }
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const username = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
             const errorText = document.getElementById('errorText');
             const csrfToken = getCSRFToken();
 
-            errorMessage.style.display = 'none';
-            loginBtn.innerHTML = 'Signing in...';
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorMessage.style.display = 'block';
+                errorText.textContent = 'Passwords do not match';
+                return;
+            }
 
-            fetch('/api/login/post/', {
+            // Reset UI
+            errorMessage.style.display = 'none';
+            registerBtn.classList.add('loading');
+            registerBtn.innerHTML = 'Creating Account...';
+
+            // Make the API call
+            fetch('/api/register/post/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
+                    'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ 
+                    firstName,
+                    lastName,
+                    username,
+                    password
+                })
             })
-            .then(response => response.json().then(data => {
-                if (response.ok) {
-                    successMessage.style.display = 'block';
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1500);
-                } else {
-                    errorMessage.style.display = 'block';
-                    errorText.textContent = data.error || 'An error occurred. Please try again.';
-                }
-            }))
-            .catch(() => {
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (response.ok) {
+                        // Show success message
+                        successMessage.style.display = 'block';
+                        
+                        // Redirect to login after a brief delay
+                        setTimeout(function() {
+                            window.location.href = '/login';
+                        }, 1500);
+                    } else {
+                        // Handle different error cases
+                        errorMessage.style.display = 'block';
+                        switch (response.status) {
+                            case 400:
+                                errorText.textContent = 'Please fill in all fields';
+                                break;
+                            case 409:
+                                errorText.textContent = 'Email already registered';
+                                break;
+                            default:
+                                errorText.textContent = 'An error occurred. Please try again.';
+                        }
+                    }
+                });
+            })
+            .catch(function(err) {
                 errorMessage.style.display = 'block';
                 errorText.textContent = 'Network error. Please check your connection.';
+            })
+            .finally(function() {
+                registerBtn.classList.remove('loading');
+                registerBtn.innerHTML = 'Create Account';
+            });
+        });
+
+        // Add input focus effects
+        document.querySelectorAll('.form-control').forEach(function(input) {
+            input.addEventListener('focus', function() {
+                input.parentElement.querySelector('i').style.color = '#667eea';
+            });
+
+            input.addEventListener('blur', function() {
+                input.parentElement.querySelector('i').style.color = '#666';
             });
         });
     </script>

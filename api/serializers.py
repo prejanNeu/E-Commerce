@@ -8,6 +8,5 @@ class UserSerializer(ModelSerializer):
     class Meta:
 
         model = User 
-
         fields = ["id","username","password"]
         extra_kwargs = {"password":{"write_only":True}} # prevent the password from exposed

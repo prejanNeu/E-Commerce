@@ -7,9 +7,9 @@ from rest_framework import status
 from app.models import CustomUser
 
 
+
 @api_view(["POST"])
 def login_api(request):
-    print("Hello")
 
     username = request.data.get("username")
     password = request.data.get("password")
@@ -17,13 +17,10 @@ def login_api(request):
     if not username or not password :
         return Response({"error": "Username and password required"}, status= status.HTTP_400_BAD_REQUEST)
     
-    print("Hello")
 
     user = authenticate(username=username,password=password)
 
-    print("Hello")
 
-    print(user)
 
     if user :
         login(request,user)
@@ -44,6 +41,11 @@ def login_api(request):
 def register_api(request):
 
     username = request.data.get("username")
+    firstName = request.data.get("firstName")
+    lastName = request.data.get("lastName")
+    print(request.data)
+    if len(firstName) < 2 or len(lastName) < 2:
+        return Response ({"message":"Name must not be empty "},status = status.HTTP_400_BAD_REQUEST)
     
 
     if CustomUser.objects.filter(username=username).exists():
@@ -54,6 +56,8 @@ def register_api(request):
         password = request.data.get("password")
         user = CustomUser.objects.create_user(username=username,password=password)
         user.is_verified = False 
+        user.first_name = firstName
+        user.last_name = lastName
         user.save()
         return Response({"message":"User create successfully"},status=status.HTTP_201_CREATED)
     
