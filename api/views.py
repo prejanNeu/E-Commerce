@@ -66,7 +66,7 @@ def trending_product(request):
 
     trending_products = Product.objects.order_by('-sold_count')[:10]  
     serializer = ProductSerializer(trending_products,many=True)
-    return Response({"data":serializer.data})
+    return Response(serializer.data)
 
 
 @api_view(['GET','POST'])
