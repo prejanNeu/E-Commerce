@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from rest_framework import status 
-from app.models import CustomUser
-
+from app.models import CustomUser,Product
+from .serializers import ProductSerializer
 
 
 @api_view(["POST"])
@@ -61,8 +61,21 @@ def register_api(request):
         user.save()
         return Response({"message":"User create successfully"},status=status.HTTP_201_CREATED)
     
+@api_view(['GET'])
+def trending_product(request):
 
-    
+    trending_products = Product.objects.order_by('-sold_count')[:10]  
+    serializer = ProductSerializer(trending_products,many=True)
+    return Response({"data":serializer.data})
+
+
+@api_view(['GET','POST'])
+def product_view(request):
+    ...
+
+
+
+
 
 
 
