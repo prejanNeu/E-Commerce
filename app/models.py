@@ -46,7 +46,15 @@ class Product(models.Model):
 
 
 class Cart(models.Model):
-    ...
+    product = models.ForeignKey(Product,null=True,blank=False,on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser,null=True,blank=False,on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True,null=True)
+
+    status = models.BooleanField(default=0)
+
+    def __str__(self):
+        return f"{self.user} {self.product}"
 
 class Order(models.Model):
 

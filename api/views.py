@@ -1,11 +1,11 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from rest_framework import status 
-from app.models import CustomUser,Product
-from .serializers import ProductSerializer
+from app.models import CustomUser,Product,Cart
+from .serializers import ProductSerializer,CartSerializer
 
 
 @api_view(["POST"])
@@ -72,6 +72,47 @@ def trending_product(request):
 @api_view(['GET','POST'])
 def product_view(request):
     ...
+
+
+
+@api_view(['POST'])
+def add_to_cart(request,productId):
+    if request.user.is_authenticated:
+
+        data = request.data
+        user=request.user
+        product = get_object_or_404(Product,id=productId)
+
+        cart_item, created = Cart.objects.get_or_create(user=user, product=product, status=0)
+
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+            return Response({"message": "Cart updated successfully", "quantity": cart_item.quantity}, status=200)
+
+        return Response({"message":"Product added to cart "},status=status.HTTP_201_CREATED)
+        
+
+    else:
+        return Response({"message":"user need to login before cart"},status=status.HTTP_401_UNAUTHORIZED)
+        
+    
+@api_view(['GET'])
+def get_cart(request):
+    if request.user.is_authenticated:
+        carts = Cart.objects.filter(user=request.user, status=0).select_related('product')
+        serializer = CartSerializer(carts, many=True, context={'request': request})
+        
+        return Response(serializer.data, status=200)  # Directly returning the list
+
+    return Response({'message': 'User not authenticated'}, status=401)
+
+
+
+
+
+
+
 
 
 

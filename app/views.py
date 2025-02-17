@@ -28,4 +28,10 @@ def dashboard_view(request):
     return render(request,"app/dashboard.html",{"information":information})
 
 
+def home_page(request):
+    
+
+    return render(request,"app/home_page.html")
+
+
 

@@ -1,0 +1,342 @@
+{%load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        nav {
+            background: #333;
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-icon {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .cart-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>ePasal Store</h1>
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒 Cart <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="products" id="products"></div>
+    </div>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <h2>Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <div style="margin-top: 1rem;">
+                <h3>Total: $<span id="cartTotal">0</span></h3>
+                <button class="btn" onclick="placeOrder()">Place Order</button>
+                <button class="btn" style="background: #6c757d;" onclick="toggleCart()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCSRFToken() {
+            let csrfToken = null;
+            document.cookie.split(';').forEach(cookie => {
+                let [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    csrfToken = value;
+                }
+            });
+            return csrfToken;
+        }
+        let products = [];
+        let cart = [];
+        let cartCount = 0;
+        const csrfToken = getCSRFToken();
+
+        
+
+
+        // Fetch products from API
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/api/product/trending');
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                // For demo purposes, use sample data
+                products = [
+                    { id: 1, name: 'Product 1', price: 99.99, image: '/api/placeholder/250/200' },
+                    { id: 2, name: 'Product 2', price: 149.99, image: '/api/placeholder/250/200' },
+                    { id: 3, name: 'Product 3', price: 199.99, image: '/api/placeholder/250/200' },
+                ];
+                displayProducts();
+            }
+        }
+
+        // Display products in the grid
+        function displayProducts() {
+            const productsContainer = document.getElementById('products');
+            productsContainer.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <h3>${product.name}</h3>
+                    <p>$${product.price}</p>
+                    <button class="btn" onclick="addToCart(${product.id})">Add to Cart</button>
+                </div>
+            `).join('');
+        }
+
+        // Add to cart functionality
+        async function addToCart(productId) {
+    try {
+        const response = await fetch(`/api/product/add_to_cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // Correctly sending CSRF token
+            },
+            body: JSON.stringify({ product_id: productId })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Added to cart:", data);
+
+        // Manually update cart for UI demo
+        const product = products.find(p => p.id === productId);
+        cart.push({ ...product, cartId: Date.now() });
+        updateCartCount();
+        displayCart();
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+    }
+}
+
+
+        // Delete from cart
+        async function deleteFromCart(cartId) {
+            try {
+                await fetch(`/api/cart/${cartId}`, {
+                    method: 'DELETE'
+                });
+                
+                // For demo purposes, manually remove from cart
+                cart = cart.filter(item => item.cartId !== cartId);
+                updateCartCount();
+                displayCart();
+            } catch (error) {
+                console.error('Error deleting from cart:', error);
+            }
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            cartCount = cart.length;
+            document.querySelector('.cart-count').textContent = cartCount;
+        }
+
+        // Toggle cart modal
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+            displayCart();
+        }
+
+        // Display cart items
+    async function displayCart() {
+    // Get DOM elements
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    
+    // Show loading state
+    cartItems.innerHTML = '<p>Loading cart items...</p>';
+    cartTotal.textContent = '0.00';
+    
+    // Fetch cart data from API
+    fetch('/api/get/cart')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Assuming API returns an array of cart items
+            cart = data; // Update global cart variable with fetched data
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Your cart is empty</p>';
+                cartTotal.textContent = '0.00';
+                return;
+            }
+            
+            // Display cart items
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        <h4>${item.name}</h4>
+                        <p>$${item.price}</p>
+                    </div>
+                    <button class="btn delete-btn" onclick="deleteFromCart(${item.price})">Delete</button>
+                </div>
+            `).join('');
+
+            // Calculate and display total
+            const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+            cartTotal.textContent = total.toFixed(2);
+        })
+        .catch(error => {
+            console.error('Error fetching cart:', error);
+            cartItems.innerHTML = '<p>Error loading cart items. Please try again later.</p>';
+        });
+}
+
+// Function to delete item from cart
+function deleteFromCart(itemId) {
+    // Show loading state for the specific item (optional)
+    
+    // Make API call to delete item
+    fetch(`/api/delete/cart-item/${itemId}`, {
+        method: 'DELETE',
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Refresh cart display after successful deletion
+            displayCart();
+        })
+        .catch(error => {
+            console.error('Error deleting item:', error);
+            alert('Failed to delete item. Please try again.');
+        });
+}
+
+        // Place order
+        function placeOrder() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            // Here you would typically make an API call to process the order
+            alert('Order placed successfully!');
+            cart = [];
+            updateCartCount();
+            toggleCart();
+        }
+
+        // Initialize the app
+        fetchProducts();
+    </script>
+</body>
+</html>
