@@ -8,5 +8,7 @@ urlpatterns = [
     path("api/product/trending",views.trending_product,name="trending_product"),
     path("api/product/add_to_cart/<int:productId>",views.add_to_cart,name="add_to_cart"),
     path("api/get/cart",views.get_cart,name="get_cart"),
-    
+    path("api/delete/cart/<int:cartId>",views.delete_cart,name="delete_cart"),
+    path("api/payment/", views.esewa_payment_api, name="esewa_payment_api"),
 ]
+    

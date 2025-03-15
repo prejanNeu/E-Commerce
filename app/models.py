@@ -50,7 +50,6 @@ class Cart(models.Model):
     user = models.ForeignKey(CustomUser,null=True,blank=False,on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True,null=True)
-
     status = models.BooleanField(default=0)
 
     def __str__(self):
@@ -59,5 +58,15 @@ class Cart(models.Model):
 class Order(models.Model):
 
     ...
+
+
+class Transaction(models.Model):
+    transaction_id = models.CharField(max_length=50, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[("Pending", "Pending"), ("Success", "Success"), ("Failed", "Failed")], default="Pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.transaction_id} - {self.status}"
 
 

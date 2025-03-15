@@ -2,5 +2,8 @@
     "workbench.colorCustomizations": {
         "minimap.background": "#00000005",
         "scrollbar.shadow": "#00000005"
+    },
+    "files.associations": {
+        "plyconfig.json": "jsonc"
     }
 }

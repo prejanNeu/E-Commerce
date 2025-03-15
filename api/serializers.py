@@ -28,7 +28,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['name', 'price', 'quantity', 'image']  # Fields to include in JSON response
+        fields = ['id','name', 'price', 'quantity', 'image']  # Fields to include in JSON response
 
     def get_image(self, obj):
         """Returns full image URL if image exists"""

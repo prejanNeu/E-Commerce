@@ -6,6 +6,17 @@ from django.contrib.auth import authenticate,login,logout
 from rest_framework import status 
 from app.models import CustomUser,Product,Cart
 from .serializers import ProductSerializer,CartSerializer
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+import uuid
+import hashlib
+import hmac
+import base64
+from django.db import IntegrityError
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from app.models import Transaction
 
 
 @api_view(["POST"])
@@ -73,8 +84,7 @@ def trending_product(request):
 def product_view(request):
     ...
 
-
-
+@login_required(login_url="/login") 
 @api_view(['POST'])
 def add_to_cart(request,productId):
     if request.user.is_authenticated:
@@ -96,7 +106,7 @@ def add_to_cart(request,productId):
     else:
         return Response({"message":"user need to login before cart"},status=status.HTTP_401_UNAUTHORIZED)
         
-    
+
 @api_view(['GET'])
 def get_cart(request):
     if request.user.is_authenticated:
@@ -106,6 +116,77 @@ def get_cart(request):
         return Response(serializer.data, status=200)  # Directly returning the list
 
     return Response({'message': 'User not authenticated'}, status=401)
+
+@api_view(['DELETE'])
+def delete_cart(request,cartId):
+    
+    if Cart.objects.filter(id=cartId).exists():
+
+        cart = Cart.objects.get(id=cartId)
+        cart.delete()
+
+        return Response({'message':"cart delete successfully"},status=status.HTTP_200_OK)
+    
+    return Response({'error':"cart not found"},status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["POST"])
+def esewa_payment_api(request):
+    # eSewa Configuration
+    ESEWA_MERCHANT_CODE = "EPAYTEST"  # Change for production
+    SUCCESS_URL = "http://127.0.0.1:8000/api/payment/success/"
+    FAILURE_URL = "http://127.0.0.1:8000/api/payment/failure/"
+    SECRET_KEY = b"8gBm/:&EnhH.1/q"  # Ensure it's in bytes
+
+    # Validate total
+    try:
+        total = float(request.data.get("total", 0))
+        if total <= 0:
+            return Response({"error": "Invalid total amount"}, status=400)
+    except ValueError:
+        return Response({"error": "Invalid total amount format"}, status=400)
+
+    # Generate a unique transaction ID
+    transaction_uuid = str(uuid.uuid4())
+
+    # Ensure the transaction ID is unique in the database
+    while True:
+        try:
+            transaction = Transaction.objects.create(transaction_id=transaction_uuid, amount=total)
+            break  # Exit loop if transaction is saved
+        except IntegrityError:
+            transaction_uuid = str(uuid.uuid4())  # Regenerate if duplicate exists
+
+    # Format total to exactly two decimal places
+    formatted_total = "{:.2f}".format(total)
+
+    # Create message for signature (Ensure order matches eSewa's requirements)
+    message = f"{formatted_total},{transaction_uuid},{ESEWA_MERCHANT_CODE}".encode()
+
+    # Generate HMAC-SHA256 signature
+    hmac_sha256 = hmac.new(SECRET_KEY, message, hashlib.sha256)
+    digest = hmac_sha256.digest()
+    signature = base64.b64encode(digest).decode('utf-8')  # Convert to Base64 string
+
+    # Debugging output (optional)
+    print("Message for Signature:", message.decode())  # Decode to check raw string
+    print("Generated Signature:", signature)
+
+    return Response({
+        "amount": formatted_total,
+        "tax_amount": "0.00",
+        "total_amount": formatted_total,
+        "transaction_uuid": transaction_uuid,  # Always unique
+        "product_code": ESEWA_MERCHANT_CODE,
+        "product_service_charge": "0.00",
+        "product_delivery_charge": "0.00",
+        "success_url": SUCCESS_URL,
+        "failure_url": FAILURE_URL,
+        "signed_field_names": "total_amount,transaction_uuid,product_code",
+        "signature": signature,
+    })
+
+
 
 
 
