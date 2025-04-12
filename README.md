@@ -29,8 +29,7 @@ sudo apt install python3
 ### Step 3: Install dependencies
 
 ```bash
-pip install django
-pip install pillow
+pip install -r requirements.txt
 ```
 
 ### Step 4: Apply database migrations
