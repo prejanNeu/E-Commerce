@@ -590,25 +590,45 @@
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                const paymentData = await response.json();
+                const payload = await response.json();
 
                 // Populate the form fields
-                document.getElementById('amount').value = paymentData.amount;
-                document.getElementById('tax_amount').value = paymentData.tax_amount;
-                document.getElementById('total_amount').value = paymentData.total_amount;
-                document.getElementById('transaction_uuid').value = paymentData.transaction_uuid;
-                document.getElementById('product_code').value = paymentData.product_code;
-                document.getElementById('product_service_charge').value = paymentData.product_service_charge;
-                document.getElementById('product_delivery_charge').value = paymentData.product_delivery_charge;
-                document.getElementById('success_url').value = paymentData.success_url;
-                document.getElementById('failure_url').value = paymentData.failure_url;
-                document.getElementById('signed_field_names').value = paymentData.signed_field_names;
-                document.getElementById('signature').value = paymentData.signature;
+                // document.getElementById('amount').value = paymentData.amount;
+                // document.getElementById('tax_amount').value = paymentData.tax_amount;
+                // document.getElementById('total_amount').value = paymentData.total_amount;
+                // document.getElementById('transaction_uuid').value = paymentData.transaction_uuid;
+                // document.getElementById('product_code').value = paymentData.product_code;
+                // document.getElementById('product_service_charge').value = paymentData.product_service_charge;
+                // document.getElementById('product_delivery_charge').value = paymentData.product_delivery_charge;
+                // document.getElementById('success_url').value = paymentData.success_url;
+                // document.getElementById('failure_url').value = paymentData.failure_url;
+                // document.getElementById('signed_field_names').value = paymentData.signed_field_names;
+                // document.getElementById('signature').value = paymentData.signature;
 
-                // Submit the form to eSewa
-                document.getElementById('esewaPaymentForm').submit();
+                // // Submit the form to eSewa
+                // document.getElementById('esewaPaymentForm').submit();
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                // https://uat.esewa.com.np/api/epay
+                // https://rc-epay.esewa.com.np/api/epay/main/v2/form
+                form.action = 'https://rc-epay.esewa.com.np/api/epay/main/v2/form';
+
+                for (const key in payload) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = payload[key];
+                form.appendChild(input);
+                }
+
+        document.body.appendChild(form);
+        form.submit();
+
+                alert(paymentData);
 
             }
+            
 
             catch (error) {
                 console.error('Error:', error);

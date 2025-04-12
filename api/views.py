@@ -141,6 +141,7 @@ def esewa_payment_api(request):
     # Validate total
     try:
         total = float(request.data.get("total", 0))
+        print(total)
         if total <= 0:
             return Response({"error": "Invalid total amount"}, status=400)
     except ValueError:
@@ -159,9 +160,11 @@ def esewa_payment_api(request):
 
     # Format total to exactly two decimal places
     formatted_total = "{:.2f}".format(total)
+    print(formatted_total)
 
     # Create message for signature (Ensure order matches eSewa's requirements)
-    message = f"{formatted_total},{transaction_uuid},{ESEWA_MERCHANT_CODE}".encode()
+    message = f"total_amount={formatted_total},transaction_uuid={transaction_uuid},product_code={ESEWA_MERCHANT_CODE}".encode('utf-8')
+
 
     # Generate HMAC-SHA256 signature
     hmac_sha256 = hmac.new(SECRET_KEY, message, hashlib.sha256)
@@ -176,7 +179,7 @@ def esewa_payment_api(request):
         "amount": formatted_total,
         "tax_amount": "0.00",
         "total_amount": formatted_total,
-        "transaction_uuid": transaction_uuid,  # Always unique
+        "transaction_uuid": str(transaction_uuid),  # Always unique
         "product_code": ESEWA_MERCHANT_CODE,
         "product_service_charge": "0.00",
         "product_delivery_charge": "0.00",
