@@ -187,7 +187,7 @@ def esewa_payment_api(request):
         "failure_url": FAILURE_URL,
         "signed_field_names": "total_amount,transaction_uuid,product_code",
         "signature": signature,
-    })
+    },status=status.HTTP_200_OK)
 
 
 
