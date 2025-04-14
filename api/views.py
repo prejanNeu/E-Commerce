@@ -32,7 +32,6 @@ def login_api(request):
     user = authenticate(username=username,password=password)
 
 
-
     if user :
         login(request,user)
         return Response({"message":"Login Successful" }, status=status.HTTP_200_OK)
@@ -45,7 +44,6 @@ def login_api(request):
     else :
         return Response({"error":"user doesnot exist "},status=status.HTTP_404_NOT_FOUND)
     
-
 
 
 @api_view(['POST'])
@@ -102,9 +100,32 @@ def add_to_cart(request,productId):
 
         return Response({"message":"Product added to cart "},status=status.HTTP_201_CREATED)
         
-
     else:
         return Response({"message":"user need to login before cart"},status=status.HTTP_401_UNAUTHORIZED)
+    
+
+
+@api_view(['POST'])
+def decrement_cart(request, productId):
+    # Get the product or 404
+    if request.user.is_authenticated:
+        product = get_object_or_404(Product, id=productId)
+
+        # Get all matching cart entries
+        cart_items = Cart.objects.filter(user=request.user, product=product).order_by('-id')
+
+        if not cart_items.exists():
+            return Response({"error": "Cart item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        cart = cart_items.first()  # Use the most recent one
+
+        if cart.quantity > 0:
+            cart.quantity -= 1
+            cart.save()
+            return Response({"message": "Product quantity decremented."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Quantity already at zero."}, status=status.HTTP_400_BAD_REQUEST)
+        
         
 
 @api_view(['GET'])
@@ -134,14 +155,13 @@ def delete_cart(request,cartId):
 def esewa_payment_api(request):
     # eSewa Configuration
     ESEWA_MERCHANT_CODE = "EPAYTEST"  # Change for production
-    SUCCESS_URL = "http://127.0.0.1:8000/api/payment/success/"
-    FAILURE_URL = "http://127.0.0.1:8000/api/payment/failure/"
+    SUCCESS_URL = "http://127.0.0.1:8000/payment/success/"
+    FAILURE_URL = "http://127.0.0.1:8000/payment/failure/"
     SECRET_KEY = b"8gBm/:&EnhH.1/q"  # Ensure it's in bytes
 
     # Validate total
     try:
         total = float(request.data.get("total", 0))
-        print(total)
         if total <= 0:
             return Response({"error": "Invalid total amount"}, status=400)
     except ValueError:
@@ -160,7 +180,7 @@ def esewa_payment_api(request):
 
     # Format total to exactly two decimal places
     formatted_total = "{:.2f}".format(total)
-    print(formatted_total)
+
 
     # Create message for signature (Ensure order matches eSewa's requirements)
     message = f"total_amount={formatted_total},transaction_uuid={transaction_uuid},product_code={ESEWA_MERCHANT_CODE}".encode('utf-8')
@@ -172,9 +192,7 @@ def esewa_payment_api(request):
     signature = base64.b64encode(digest).decode('utf-8')  # Convert to Base64 string
 
     # Debugging output (optional)
-    print("Message for Signature:", message.decode())  # Decode to check raw string
-    print("Generated Signature:", signature)
-
+   
     return Response({
         "amount": formatted_total,
         "tax_amount": "0.00",

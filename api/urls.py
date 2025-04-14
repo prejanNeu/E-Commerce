@@ -10,5 +10,6 @@ urlpatterns = [
     path("api/get/cart",views.get_cart,name="get_cart"),
     path("api/delete/cart/<int:cartId>",views.delete_cart,name="delete_cart"),
     path("api/payment/", views.esewa_payment_api, name="esewa_payment_api"),
+    path("api/cart/decrement/<int:productId>",views.decrement_cart,name="decrement_cart"),
 ]
     

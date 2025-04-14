@@ -63,6 +63,7 @@ function displayProducts(products) {
 // Add product to cart
 async function addToCart(productId) {
     try {
+        console.log(productId)
         const response = await fetch(`http://127.0.0.1:8000/api/product/add_to_cart/${productId}`, {
             method: 'POST',
             headers: {
@@ -73,10 +74,11 @@ async function addToCart(productId) {
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
+            alert('Product added to cart successfully!');
         }
 
         await fetchCart(); // Refresh cart from server
-        alert('Product added to cart successfully!');
+        
     } catch (error) {
         console.error('Error adding to cart:', error);
         alert('Failed to add product to cart. Please try again.');
@@ -85,6 +87,7 @@ async function addToCart(productId) {
 
 // Update cart UI
 function updateCartUI() {
+
     const cartContainer = document.getElementById('cart-items');
     const cartCount = document.getElementById('cart-count');
     const cartTotal = document.getElementById('cart-total');
@@ -92,14 +95,12 @@ function updateCartUI() {
     // Update cart count
     const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
     cartCount.textContent = totalItems;
-    
     // If cart is empty, show message
     if (cart.length === 0) {
         cartContainer.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
         cartTotal.textContent = '₨ 0.00';
         return;
     }
-    
     
     cartContainer.innerHTML = cart.map(item => `
         <div class="cart-item">
@@ -109,9 +110,9 @@ function updateCartUI() {
                 <p class="cart-item-price">₨ ${item.price}</p>
             </div>
             <div class="quantity-controls">
-                <button class="quantity-btn" onclick="decrementQuantity(${item.id})">-</button>
+                <button class="quantity-btn" onclick="decrementQuantity(${item.product_id})">-</button>
                 <span>${item.quantity}</span>
-                <button class="quantity-btn" onclick="addToCart(${item.id})">+</button>
+                <button class="quantity-btn" onclick="addToCart(${item.product_id})">
                 <button class="btn" onclick="removeFromCart(${item.id})">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -130,15 +131,15 @@ function updateCartUI() {
 }
 
 // Decrement item quantity
-async function decrementQuantity(cartId) {
+async function decrementQuantity(productId) {
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/cart/decrement', {
+        console.log(productId)
+        const response = await fetch(`http://127.0.0.1:8000/api/cart/decrement/${productId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify({ cart_id: cartId })
+            }
         });
 
         if (!response.ok) {
