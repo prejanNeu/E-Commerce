@@ -24,11 +24,9 @@ def paymentSuccess(request):
     amount = payment_data.get('total_amount')  # might be "1,300.0" string
     transaction_id = payment_data.get('transaction_uuid')            
     product_code = payment_data.get('product_code')
-
     transcaction = Transaction.objects.get(transaction_id=transaction_id)
 
     transcaction.status = "Success"
-
     transcaction.save()
 
 

@@ -112,7 +112,7 @@ function updateCartUI() {
             <div class="quantity-controls">
                 <button class="quantity-btn" onclick="decrementQuantity(${item.product_id})">-</button>
                 <span>${item.quantity}</span>
-                <button class="quantity-btn" onclick="addToCart(${item.product_id})">
+                <button class="quantity-btn" onclick="addToCart(${item.product_id})">+</button>
                 <button class="btn" onclick="removeFromCart(${item.id})">
                     <i class="fas fa-trash"></i>
                 </button>
