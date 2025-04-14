@@ -37,7 +37,10 @@ def paymentSuccess(request):
 
 
     try :
-        carts = Cart.objects.get(user=user,status=0)
+        carts = Cart.objects.filter(user=user,status=0).first()
+
+
+
         carts.status = 1
 
         carts.save()
