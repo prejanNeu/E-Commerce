@@ -514,6 +514,8 @@ nav {
        <div class="auth-buttons">
         <a class="btn btn-login" href="{% url 'login_page' %}">Login</a>
         <a class="btn btn-register" href="{% url 'register_page' %}">Register</a>
+        <a class="btn btn-register" href="{% url 'logout_page' %}">Logout</a>
+
     </div>
     
    </nav>
@@ -532,7 +534,7 @@ nav {
                <!-- Cart items will be dynamically inserted here -->
            </div>
            <div class="cart-summary">
-               <h3>Total: <span id="cart-total">₨ 10.00</span></h3>
+               <h3>Total: <span id="cart-total">₨ 0.00</span></h3>
                <button class="btn btn-checkout" onclick="initiatePayment()">Checkout with eSewa</button>
            </div>
        </section>

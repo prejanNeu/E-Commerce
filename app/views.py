@@ -24,8 +24,8 @@ def register_page(request):
 
 
 def logout_page(request):
-
-    logout(request.user)
+    logout(request)
+    return redirect('login_page')
 
 def send_mail(request):
     ...
