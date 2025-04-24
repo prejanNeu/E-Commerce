@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
-    # 'corsheaders', #cors origin resources setup 
+    'corsheaders', #cors origin resources setup 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # 'corsheaders.middleware.CorsMiddleware', #cors origin resources setup
+    'corsheaders.middleware.CorsMiddleware', #cors origin resources setup
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -117,7 +117,19 @@ USE_I18N = True
 USE_TZ = True
 
 # cors origin resources setup 
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 
 # Static files (CSS, JavaScript, Images)

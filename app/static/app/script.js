@@ -64,7 +64,7 @@ function displayProducts(products) {
 async function addToCart(productId) {
     try {
         console.log(productId)
-        const response = await fetch(`http://127.0.0.1:8000/api/product/add_to_cart/${productId}`, {
+        const response = await fetch(`/api/product/add_to_cart/${productId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ function updateCartUI() {
 async function decrementQuantity(productId) {
     try {
         console.log(productId)
-        const response = await fetch(`http://127.0.0.1:8000/api/cart/decrement/${productId}`, {
+        const response = await fetch(`/api/cart/decrement/${productId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ async function decrementQuantity(productId) {
 // Remove item from cart
 async function removeFromCart(cartId) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/delete/cart/${cartId}`, {
+        const response = await fetch(`/api/delete/cart/${cartId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
