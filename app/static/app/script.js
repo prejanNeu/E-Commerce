@@ -16,7 +16,8 @@ function getCSRFToken() {
 // Fetch products from API
 async function fetchProducts() {
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/product/trending');
+        const response = await fetch('/api/product/trending');
+        console.log(response)
         const products = await response.json();
         displayProducts(products);
         await fetchCart(); // Load initial cart state
@@ -28,7 +29,7 @@ async function fetchProducts() {
 // Fetch cart items from API
 async function fetchCart() {
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/get/cart', {
+        const response = await fetch('/api/get/cart', {
             headers: {
                 'X-CSRFToken': getCSRFToken()
             }
@@ -47,7 +48,7 @@ function displayProducts(products) {
     const container = document.getElementById('products-container');
     container.innerHTML = products.map(product => `
         <div class="product-card">
-            <img src="http://127.0.0.1:8000${product.image}" alt="${product.name}" class="product-image">
+            <img src = "${product.image}" alt="${product.name}" class="product-image">
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
