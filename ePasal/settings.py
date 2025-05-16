@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'api',
     'app',
     'rest_framework',
+    'drf_yasg',
 
 ]
 
