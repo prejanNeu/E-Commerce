@@ -25,7 +25,7 @@ class Product(models.Model):
     name = models.CharField(max_length=40,blank=False,null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2,blank=True,null=True)
     description = models.CharField(max_length=600,default='')
-    image= models.ImageField(upload_to='products',null=True,blank=False)
+    image= models.ImageField(upload_to='products/',null=True,blank=False)
     stock = models.PositiveIntegerField(blank=False,default=1)
     category = models.ForeignKey(Category,default=1,on_delete=models.CASCADE)
     sold_count = models.PositiveIntegerField(default=0)
