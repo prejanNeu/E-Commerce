@@ -61,10 +61,10 @@ function displayProducts(products) {
     `).join('');
 }
 
-// Add product to cart
 async function addToCart(productId) {
     try {
-        console.log(productId)
+        console.log(productId);
+
         const response = await fetch(`/api/product/add_to_cart/${productId}`, {
             method: 'POST',
             headers: {
@@ -73,18 +73,28 @@ async function addToCart(productId) {
             }
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+        if (response.status === 201) {
             alert('Product added to cart successfully!');
+        } else if (response.status === 200) {
+            const data = await response.json();
+            alert(`Cart updated: quantity is now ${data.quantity}`);
+        }  else {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
         }
 
-        await fetchCart(); // Refresh cart from server
-        
+        await fetchCart(); // Refresh cart UI
     } catch (error) {
-        console.error('Error adding to cart:', error);
-        alert('Failed to add product to cart. Please try again.');
+        // Only show alert if not unauthorized (we already handled that case)
+        if (!error.message.includes("401")) {
+            console.error('Error adding to cart:', error);
+            window.location.href = '/login';
+            alert('Login First');
+        }
     }
 }
+
+
 
 // Update cart UI
 function updateCartUI() {
